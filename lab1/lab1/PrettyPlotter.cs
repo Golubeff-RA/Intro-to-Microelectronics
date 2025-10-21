@@ -1,16 +1,10 @@
 ﻿using ScottPlot;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace lab1
 {
     public class PrettyPlotter
     {
-        public static void SavePlots(SystemDE system, string for_x_ses, string for_y_ses)
+        public static void SavePlots(SystemDE system, string for_x_ses, string for_y_ses, string[] x_annots, string[] y_annots)
         {
             if (for_x_ses != null)
             {
@@ -26,7 +20,7 @@ namespace lab1
                 {
                     double[] state = system.Solution.XHistory.Select(x => x[i]).ToArray();
                     var scat = plt.Add.Scatter(time, state);
-                    scat.LegendText = $"Состояние X{i + 1}";
+                    scat.LegendText = x_annots[i];
                 }
 
                 plt.ShowLegend(Alignment.UpperRight);
@@ -48,7 +42,7 @@ namespace lab1
                 {
                     double[] state = system.Solution.YHistory.Select(x => x[i]).ToArray();
                     var scat = plt.Add.Scatter(time, state);
-                    scat.LegendText = $"Выход Y{i + 1}";
+                    scat.LegendText = y_annots[i];
                 }
 
                 plt.ShowLegend(Alignment.UpperRight);

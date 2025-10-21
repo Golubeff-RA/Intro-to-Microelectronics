@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MathNet.Numerics.LinearAlgebra;
+﻿using MathNet.Numerics.LinearAlgebra;
 
 namespace lab1
 {
@@ -29,7 +24,7 @@ namespace lab1
             this.size_y_ = size_y > 0 ? size_y : 0;
             this.x_history_ = new List<Vector<double>>();
             this.y_history_ = new List<Vector<double>>();
-            this.time_history_= new List<double>();
+            this.time_history_ = new List<double>();
         }
 
         public bool AppendStep(Vector<double> new_x, Vector<double> new_y, double timestamp)
@@ -40,9 +35,9 @@ namespace lab1
             time_history_.Add(timestamp);
             return true;
         }
-        public List <Vector<double>> XHistory { get { return x_history_; } }
-        public List <Vector<double>> YHistory { get { return y_history_; } }
-        public List <double> TimeHistory { get { return time_history_; } }
+        public List<Vector<double>> XHistory { get { return x_history_; } }
+        public List<Vector<double>> YHistory { get { return y_history_; } }
+        public List<double> TimeHistory { get { return time_history_; } }
         public int SizeX { get { return size_x_; } }
         public int SizeY { get { return size_y_; } }
     }

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MathNet.Numerics.LinearAlgebra;
+﻿using MathNet.Numerics.LinearAlgebra;
 
 namespace lab1
 {
@@ -25,9 +20,34 @@ namespace lab1
             A_ = A; B_ = B; C_ = C; D_ = D; V_ = V; X_start_ = X_start;
             solution_ = new Solution(A_.ColumnCount, C_.RowCount);
         }
-        public Solution Solution { get { return solution_; } } 
+
+        public SystemDE(double C, double L, double R1, double R2, Vector<double> J, Vector<double> X_start)
+        {
+            if (C <= 0) { throw new ArgumentException("C can't be <= 0"); }
+            if (L <= 0) { throw new ArgumentException("L can't be <= 0"); }
+            if (R2 <= 0) { throw new ArgumentException("R2 can't be <= 0"); }
+            if (J.Count != 1) { throw new ArgumentException("V size doesn't match B size"); }
+            if (X_start.Count != 2) { throw new ArgumentException("X_start size doesn't match A size"); }
+
+            A_ = Matrix<double>.Build.DenseOfArray(new double[,] {
+                    {-1 / (C * R2), -1 / C},
+                    {1 / L, -R1 / L} });
+            B_ = Matrix<double>.Build.DenseOfArray(new double[,] {
+                    {1 / C},
+                    {0 } });
+            C_ = Matrix<double>.Build.DenseOfArray(new double[,] {
+                    {1 / R2, 0},
+                    {-1 / R2, -1}});
+            D_ = Matrix<double>.Build.DenseOfArray(new double[,] {
+                    { 0 },
+                    { 1 } });
+            V_ = J;
+            X_start_ = X_start;
+            solution_ = new Solution(A_.ColumnCount, C_.RowCount);
+        }
+        public Solution Solution { get { return solution_; } }
         public Matrix<double> A { get { return A_; } }
-        public Matrix<double> B { get { return B_; } }  
+        public Matrix<double> B { get { return B_; } }
         public Matrix<double> C { get { return C_; } }
         public Matrix<double> D { get { return D_; } }
         public Vector<double> V { get { return V_; } }
