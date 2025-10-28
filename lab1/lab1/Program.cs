@@ -1,29 +1,41 @@
-﻿using HarfBuzzSharp;
-using lab1;
-using MathNet.Numerics.LinearAlgebra;
+﻿using lab1;
+using System.Text;
+
+string jsonContent = File.ReadAllText("input_sample.json", Encoding.UTF8);
+
+var scheme = ElectricSchemeDeserializer.DeserializeFromJson(jsonContent);
+
+Console.WriteLine($"Резисторы: {scheme.resistors.Count}");
+foreach (var item in scheme.resistors)
+    Console.WriteLine(item);
+Console.WriteLine($"Конденсаторы: {scheme.capacitors.Count}");
+foreach (var item in scheme.capacitors)
+    Console.WriteLine(item);
+Console.WriteLine($"Катушки: {scheme.inductors.Count}");
+foreach (var item in scheme.inductors)
+    Console.WriteLine(item);
+Console.WriteLine($"Источники тока: {scheme.current_sources.Count}");
+foreach (var item in scheme.current_sources)
+    Console.WriteLine(item);
+Console.WriteLine($"Источники напряжения: {scheme.voltage_sources.Count}");
+foreach (var item in scheme.voltage_sources)
+    Console.WriteLine(item);
+
+Console.WriteLine("\nOutputs:");
+foreach (var output in scheme.outputs)
+    Console.WriteLine(output);
 
 
-double C = 0.5;
-double L = 1;
-double R1 = 5;
-double R2 = 7;
+Console.WriteLine("\nState variables:");
+foreach (var output in scheme.state_vars)
+    Console.WriteLine(output);
 
-var X_start = Vector<double>.Build.DenseOfArray(new double[] { 0, 0 });
-var J = Vector<double>.Build.DenseOfArray(new double[] { 1 });
+var tree = scheme.GetBackBoneTree();
+Console.WriteLine("\n\nBranches for backbone tree:");
+foreach (var item in tree)
+    Console.WriteLine(item);
 
-var system_de = new SystemDE(C, L, R1, R2, J, X_start);
-Solver.Solve(system_de, new EulerNumericSolver(), 10, 0.01);
-
-string plots_path = "../../../../../lab1_plots";
-
-if (!Directory.Exists(plots_path))
-{
-    Directory.CreateDirectory(plots_path);
-    Console.WriteLine($"Папка создана: {plots_path}");
-}
-string[] x_annotations = ["U(c)", "I(L)" ];
-string[] y_annotations = ["I(2)", "I(3)" ];
-string x_file = Path.Combine(plots_path, $"X_at_{DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss")}.png");
-string y_file = Path.Combine(plots_path, $"Y_at_{DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss")}.png");
-
-PrettyPlotter.SavePlots(system_de, x_file, y_file, x_annotations, y_annotations);
+var edges = scheme.GetAllBranches();
+var cycles = CycleDecomposition.FindCircutsWithTreeEdges(edges, tree);
+foreach(var cyc in cycles)
+    Console.WriteLine(cyc);
