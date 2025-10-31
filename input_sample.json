@@ -12,6 +12,7 @@
             "input_node": "A",
             "output_node": "C"
         }
+        
     ],
     "capacitors": [
         {
@@ -40,24 +41,26 @@
 
     "state_valiables": [
         {
-            "unique_id": 1,
-            "state_type": "current"
+            "annotation" : "U_C",
+            "unique_id": 2,
+            "state_type": "voltage"
         },
         {
-            "unique_id": 2,
+            "annotation" : "I_L",
+            "unique_id": 3,
             "state_type": "current"
         }
     ],
 
     "outputs": [
         {
-            "annotation" : "U_C",
+            "annotation" : "I_2",
             "unique_id": 1,
-            "state_type": "voltage"
+            "state_type": "current"
         },
         {
-            "annotation" : "I_C",
-            "unique_id": 2,
+            "annotation" : "I_3",
+            "unique_id": 3,
             "state_type": "current"
         }
     ]
