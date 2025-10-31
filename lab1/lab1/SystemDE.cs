@@ -53,4 +53,5 @@ namespace lab1
         public Vector<double> V { get { return V_; } }
         public Vector<double> X_start { get { return X_start_; } }
     }
+
 }

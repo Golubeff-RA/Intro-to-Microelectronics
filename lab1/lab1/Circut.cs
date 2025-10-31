@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace lab1
+﻿namespace lab1
 {
     public class Circut
     {
@@ -28,6 +22,60 @@ namespace lab1
                 cir_str += branch.ToString() + "\n";
             }
             return cir_str;
+        }
+
+        public static int CheckBranchesConsistency(string nodeOrder, Branch branch1, Branch branch2)
+        {
+            if (string.IsNullOrEmpty(nodeOrder) || branch1 == null || branch2 == null)
+                return -1;
+            if (nodeOrder.Length == 2)
+                if (branch1.input_node + branch1.output_node == branch2.input_node + branch2.output_node)
+                    return -1;
+                else
+                    return 1;
+                    var nodes = nodeOrder.Select(c => c.ToString()).ToList();
+            int n = nodes.Count;
+
+            // Проверяем направление первого ребра
+            int dir1 = GetBranchDirection(branch1, nodes);
+            int dir2 = GetBranchDirection(branch2, nodes);
+
+            // Если какое-то ребро невалидно или вершины не смежные
+            if (dir1 == 0 || dir2 == 0)
+                return -1;
+
+            // Если направления одинаковые (оба +1 или оба -1) -> согласованы
+            if (dir1 == dir2)
+                return 1;
+            else
+                return -1;
+        }
+
+        private static int GetBranchDirection(Branch branch, List<string> nodes)
+        {
+            int inputPos = nodes.IndexOf(branch.input_node);
+            int outputPos = nodes.IndexOf(branch.output_node);
+
+            if (inputPos == -1 || outputPos == -1)
+                return 0; // вершина не найдена
+
+            // Проверяем, являются ли вершины соседями
+            bool areAdjacent = Math.Abs(inputPos - outputPos) == 1 ||
+                              (inputPos == 0 && outputPos == nodes.Count - 1) ||
+                              (outputPos == 0 && inputPos == nodes.Count - 1);
+
+            if (!areAdjacent)
+                return 0; // вершины не смежные
+
+            // Определяем направление
+            int diff = (outputPos - inputPos + nodes.Count) % nodes.Count;
+
+            if (diff == 1) // прямое направление
+                return 1;
+            else if (diff == nodes.Count - 1) // обратное направление
+                return -1;
+            else
+                return 0;
         }
     }
     public class CycleDecomposition
