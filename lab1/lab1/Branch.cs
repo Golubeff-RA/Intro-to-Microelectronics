@@ -13,7 +13,6 @@ namespace lab1
         [Description("current")]
         CURRENT
     }
-
     public static class EnumExtensions
     {
         public static string GetDescription(this Enum value)
@@ -35,14 +34,12 @@ namespace lab1
                 }
             }
 
-            // Если не нашли по Description, пробуем парсить по имени enum
             if (Enum.TryParse(typeof(T), description, true, out var result))
                 return (T)result;
 
             throw new ArgumentException($"No enum value found for description: {description}");
         }
     }
-
     public class StateTypesConverter : JsonConverter<STATE_TYPES>
     {
         public override STATE_TYPES Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -56,7 +53,6 @@ namespace lab1
             writer.WriteStringValue(value.GetDescription());
         }
     }
-
     public class StateVariable
     {
         public string annotation { get; set; } = "";
@@ -68,7 +64,6 @@ namespace lab1
             return $"State variable {annotation}: element_id = {unique_id}, type = {type}";
         }
     }
-
     public class Branch
     {
         public int unique_id { get; set; }
@@ -89,25 +84,21 @@ namespace lab1
         public double resistance { get; set; }
         public override string ToString() => "Resistor" + base.ToString() + $"resistance = {resistance}";
     }
-
     public class CapacitorBranch : Branch
     {
         public double capacity { get; set; }
         public override string ToString() => "Capacitor" + base.ToString() + $"capacity = {capacity}";
     }
-
     public class InductorBranch : Branch
     {
         public double inductivity { get; set; }
         public override string ToString() => "Inductor" + base.ToString() + $"inductivity = {inductivity}";
     }
-
     public class CurrentSourceBranch : Branch
     {
         public double current { get; set; }
         public override string ToString() => "Current source" + base.ToString() + $"current = {current}";
     }
-
     public class VoltageSourceBranch : Branch
     {
         public double voltage { get; set; }

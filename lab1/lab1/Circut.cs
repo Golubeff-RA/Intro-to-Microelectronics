@@ -35,44 +35,37 @@
                     return 1;
                     var nodes = nodeOrder.Select(c => c.ToString()).ToList();
             int n = nodes.Count;
-
-            // Проверяем направление первого ребра
             int dir1 = GetBranchDirection(branch1, nodes);
             int dir2 = GetBranchDirection(branch2, nodes);
 
-            // Если какое-то ребро невалидно или вершины не смежные
             if (dir1 == 0 || dir2 == 0)
                 return -1;
 
-            // Если направления одинаковые (оба +1 или оба -1) -> согласованы
             if (dir1 == dir2)
                 return 1;
             else
                 return -1;
         }
-
         private static int GetBranchDirection(Branch branch, List<string> nodes)
         {
             int inputPos = nodes.IndexOf(branch.input_node);
             int outputPos = nodes.IndexOf(branch.output_node);
 
             if (inputPos == -1 || outputPos == -1)
-                return 0; // вершина не найдена
+                return 0;
 
-            // Проверяем, являются ли вершины соседями
             bool areAdjacent = Math.Abs(inputPos - outputPos) == 1 ||
                               (inputPos == 0 && outputPos == nodes.Count - 1) ||
                               (outputPos == 0 && inputPos == nodes.Count - 1);
 
             if (!areAdjacent)
-                return 0; // вершины не смежные
+                return 0;
 
-            // Определяем направление
             int diff = (outputPos - inputPos + nodes.Count) % nodes.Count;
 
-            if (diff == 1) // прямое направление
+            if (diff == 1)
                 return 1;
-            else if (diff == nodes.Count - 1) // обратное направление
+            else if (diff == nodes.Count - 1)
                 return -1;
             else
                 return 0;
@@ -87,14 +80,11 @@
             var Circuts = new List<Circut>();
             var usedEdges = new HashSet<int>();
 
-            // Шаг 1: Создаём контуры для параллельных рёбер (каждое параллельное ребро + ребро из дерева)
             CreateParallelCircuts(allEdges, spanningTree, Circuts, usedEdges);
 
-            // Шаг 2: Находим оставшиеся рёбра не из дерева
             var remainingChords = allEdges.Where(edge =>
                 !IsTreeEdge(spanningTree, edge) && !usedEdges.Contains(edge.unique_id)).ToList();
 
-            // Шаг 3: Для каждой оставшейся хорды строим фундаментальный цикл
             foreach (var chord in remainingChords)
             {
                 if (usedEdges.Contains(chord.unique_id)) continue;
@@ -119,7 +109,6 @@
             List<Circut> Circuts,
             HashSet<int> usedEdges)
         {
-            // Группируем все рёбра по парам вершин
             var edgesByVertexPair = allEdges
                 .GroupBy(edge => NormalizeEdgeKey(edge.input_node, edge.output_node))
                 .ToList();
@@ -127,26 +116,15 @@
             foreach (var group in edgesByVertexPair)
             {
                 var edges = group.ToList();
-
-                // Если только одно ребро - пропускаем (нет параллельных)
                 if (edges.Count <= 1) continue;
-
-                // Находим рёбра из дерева в этой группе
                 var treeEdgesInGroup = edges.Where(edge => IsTreeEdge(spanningTree, edge)).ToList();
-
-                // Если нет рёбер из дерева - пропускаем
                 if (!treeEdgesInGroup.Any()) continue;
-
-                // Берём первое ребро из дерева как основу
                 var treeEdge = treeEdgesInGroup[0];
-
-                // Для каждого параллельного ребра (которое не является этим деревом) создаём контур
                 foreach (var parallelEdge in edges)
                 {
                     if (parallelEdge.unique_id == treeEdge.unique_id) continue;
                     if (usedEdges.Contains(parallelEdge.unique_id)) continue;
 
-                    // Создаём контур из деревянного ребра и параллельного
                     var Circut = new Circut
                     {
                         node_order = $"{treeEdge.input_node}{treeEdge.output_node}",
@@ -154,30 +132,19 @@
                     };
 
                     Circuts.Add(Circut);
-
-                    // Помечаем параллельное ребро как использованное
                     usedEdges.Add(parallelEdge.unique_id);
                 }
-
-                // Помечаем деревянное ребро как использованное в параллельных контурах
                 usedEdges.Add(treeEdge.unique_id);
             }
         }
 
         private static Circut FindFundamentalCircut(List<Branch> spanningTree, Branch chord, HashSet<int> usedEdges)
         {
-            // Строим граф из ВСЕХ рёбер дерева (даже использованных в параллельных контурах)
             var graph = BuildGraph(spanningTree);
-
-            // Находим путь между вершинами хорды в дереве
             var path = FindPathInTree(graph, chord.input_node, chord.output_node);
 
             if (path == null || path.Count < 2) return null;
-
-            // Собираем цикл: путь в дереве + хорда
             var CircutBranches = new List<Branch>();
-
-            // Добавляем рёбра пути из дерева
             for (int i = 0; i < path.Count - 1; i++)
             {
                 var edge = FindEdge(spanningTree, path[i], path[i + 1]);
@@ -186,11 +153,7 @@
                     CircutBranches.Add(edge);
                 }
             }
-
-            // Добавляем саму хорду
             CircutBranches.Add(chord);
-
-            // Формируем node_order
             var nodeOrder = BuildNodeOrder(path);
 
             return new Circut
@@ -266,7 +229,6 @@
 
         private static string BuildNodeOrder(List<string> path)
         {
-            // Убираем дубликаты, сохраняя порядок
             var uniqueNodes = new List<string>();
             foreach (var node in path)
             {
@@ -287,12 +249,9 @@
             return spanningTree.Any(treeEdge => treeEdge.unique_id == edge.unique_id);
         }
 
-        // Вспомогательный метод для проверки валидности контура
         public static bool ValidateCircut(Circut Circut)
         {
             if (Circut.branches.Count == 0) return false;
-
-            // Для контуров длины 2 (параллельные рёбра) - это валидный случай
             if (Circut.branches.Count == 2)
             {
                 var edge1 = Circut.branches[0];
@@ -301,7 +260,6 @@
                        NormalizeEdgeKey(edge2.input_node, edge2.output_node);
             }
 
-            // Для остальных контуров проверяем, что все вершины имеют степень 2
             var degree = new Dictionary<string, int>();
             foreach (var edge in Circut.branches)
             {
@@ -315,5 +273,4 @@
             return degree.All(kvp => kvp.Value == 2);
         }
     }
-
 }

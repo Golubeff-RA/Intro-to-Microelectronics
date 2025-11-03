@@ -1,0 +1,54 @@
+{
+    "resistors": [
+        {
+            "unique_id": 0,
+            "resistance": 0.2,
+            "input_node": "B",
+            "output_node": "C"
+        }
+    ],
+
+    "capacitors": [
+        {
+            "unique_id": 1,
+            "capacity": 2,
+            "input_node": "C",
+            "output_node": "A"
+        }
+    ],
+
+    "inductors": [
+        {
+            "unique_id": 2,
+            "inductivity": 2,
+            "input_node": "A",
+            "output_node": "B"
+        }
+    ],
+
+    "state_valiables": [
+        {
+            "annotation" : "U_C",
+            "unique_id": 1,
+            "state_type": "voltage"
+        },
+        {
+            "annotation" : "I_L",
+            "unique_id": 2,
+            "state_type": "current"
+        }
+    ],
+
+    "outputs": [
+        {
+            "annotation" : "U_R",
+            "unique_id": 0,
+            "state_type": "voltage"
+        },
+        {
+            "annotation" : "I_R",
+            "unique_id": 0,
+            "state_type": "current"
+        }
+    ]
+}

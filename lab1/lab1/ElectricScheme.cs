@@ -1,4 +1,5 @@
 ﻿using MathNet.Numerics.LinearAlgebra;
+using ScottPlot.TickGenerators.TimeUnits;
 using System.Linq.Expressions;
 using System.Reflection.Metadata.Ecma335;
 using System.Text.Json.Serialization;
@@ -225,7 +226,6 @@ namespace lab1
             Console.WriteLine("---");
 
         }
-        
         public Dictionary<string, int> GetAnnotToIndDict()
         {
             var answer = new Dictionary<string, int>();
@@ -238,7 +238,7 @@ namespace lab1
             }
             return answer;
         }
-        public Matrix<double> CalcBigMatrix()
+        public Matrix<double> CalcBigMatrix(HashSet<int> ignore_columns)
         {
             var annot_to_idx = GetAnnotToIndDict();
             var idx_to_annot = annot_to_idx.ToDictionary(x => x.Value, x => x.Key);
@@ -295,9 +295,12 @@ namespace lab1
                 current_row++;
             }
 
+            foreach (int ign_col in ignore_columns)
+                for (int j = 0; j < answer.RowCount; j++)
+                    answer[j, ign_col] = 0;
+
             return answer;
         }
-
         public HashSet<int> GetNeededCols(List<StateVariable> vars, int padding)
         {
             var cols = new HashSet<int>();
@@ -320,7 +323,46 @@ namespace lab1
                 cols.Add(volt.unique_id);
             return cols;
         }
+        public Tuple<Matrix<double>, Matrix<double>> CalcTwoMatrices(Matrix<double> processed, 
+            HashSet<int> blue_cols, HashSet<int>yellow_cols, HashSet<int> green_cols)
+        {
+            var A = Matrix<double>.Build.Dense(state_vars.Count, state_vars.Count);
+            var B = Matrix<double>.Build.Dense(state_vars.Count, current_sources.Count + voltage_sources.Count);
+            int current_row = 0;
+            foreach (int blue_col in blue_cols.OrderBy(c => c))
+            {
+                int current_col = 0;
+                foreach (int yellow_col in yellow_cols.OrderBy(c => c))
+                {
+                    A[current_row, current_col] = -processed[current_row, yellow_col];
+                    current_col++;
+                }
+                current_col = 0;
+                foreach (int green_col in green_cols.OrderBy(c => c))
+                {
+                    B[current_row, current_col] = -processed[current_row, green_col];
+                    current_col++;
+                }
+                current_row++;
+            }
+            return new Tuple<Matrix<double>, Matrix<double>>(A, B);
+        }
+        public Vector<double> GetVVector()
+        {
+            Vector<double> v = Vector<double>.Build.Dense(current_sources.Count + voltage_sources.Count);
+            for (int i = 0; i < voltage_sources.Count; i++)
+                v[i] = voltage_sources[i].voltage;
+            for (int i = voltage_sources.Count; i < current_sources.Count + voltage_sources.Count; i++)
+                v[i] = current_sources[i - voltage_sources.Count].current;
+            return v;
+        }
 
-
+        public static string[] GetAnnotationsOf(List<StateVariable> vars)
+        {
+            string[] answer = new string[vars.Count];
+            for (int i = 0; i < vars.Count; i++)
+                answer[i] = vars[i].annotation;
+            return answer;
+        }
     }
 }
