@@ -11,6 +11,7 @@ namespace lab1
 {
     public class V_V_Samokhin_matrix_desintegrator
     {
+        private static Random random = new Random(124);
         private static void GaussSubtraction(ref Matrix<double> matrix, int row1, int row2, double coeff)
         {
             for (int i = 0; i < matrix.ColumnCount; ++i)
@@ -30,10 +31,14 @@ namespace lab1
         }
         private static int GetNotNullRow(Matrix<double> matrix, int row, int col, HashSet<int> used_rows)
         {
+            List<int> rows = new List<int>();
             for (int i = 0; i < matrix.RowCount; i++)
                 if (!used_rows.Contains(i) && i != row && (Math.Abs(matrix[i, col]) > 1e-10))
-                    return i;
-            return -1;
+                    rows.Add(i);
+            if (rows.Count == 0) return -1;
+            
+            int index = random.Next(0, rows.Count);
+            return rows[index];
         }
         // Нужно сделать так, чтобы в каждом голубом столбце была лишь 1 единица в строке i (остальные - нули)
         // При этом в этой iй строке ненулевые коэффиценты должны быть только в желтых столбцах и данном голубом столбце
@@ -71,7 +76,7 @@ namespace lab1
                     if (not_null_col != -1)
                     {
                         // получили строку тож с ненулевым кэфом в этом столбце
-                        int row_to_substrate = GetNotNullRow(copy, needed_row, not_null_col, used_rows);
+                        int row_to_substrate = GetNotNullRow(copy, needed_row, not_null_col, new HashSet<int>());
                         if (row_to_substrate == -1)
                         {
                             throw new Exception($"no row to substrate! {not_null_col}");

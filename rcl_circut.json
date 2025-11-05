@@ -2,7 +2,7 @@
     "resistors": [
         {
             "unique_id": 0,
-            "resistance": 0.2,
+            "resistance": -0.2,
             "input_node": "B",
             "output_node": "C"
         }
@@ -41,13 +41,13 @@
 
     "outputs": [
         {
-            "annotation" : "U_R",
-            "unique_id": 0,
-            "state_type": "voltage"
-        },
-        {
             "annotation" : "I_R",
             "unique_id": 0,
+            "state_type": "current"
+        },
+        {
+            "annotation" : "I_C",
+            "unique_id": 1,
             "state_type": "current"
         }
     ]

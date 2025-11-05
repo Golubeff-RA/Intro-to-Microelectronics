@@ -13,7 +13,6 @@
             }
             return ids;
         }
-
         public override string ToString()
         {
             string cir_str = $"Circut: {node_order}\n";
@@ -23,7 +22,6 @@
             }
             return cir_str;
         }
-
         public static int CheckBranchesConsistency(string nodeOrder, Branch branch1, Branch branch2)
         {
             if (string.IsNullOrEmpty(nodeOrder) || branch1 == null || branch2 == null)

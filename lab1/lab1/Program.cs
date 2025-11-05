@@ -36,6 +36,10 @@ class Program
         Console.WriteLine("\n===Система уравнений для напряжений и токов===");
         scheme.PrintSystemByMMatrix();
 
+        foreach (var annot in scheme.GetAnnotToIndDict().OrderBy(x => x.Value))
+            Console.Write(annot.Key + " ");
+
+        Console.WriteLine();
         Console.WriteLine(scheme.CalcBigMatrix(new HashSet<int>()).ToMatrixString());
         Console.WriteLine("столбцы выходов (Y) = ");
         foreach (var y_col in scheme.GetNeededCols(scheme.outputs, 0))
