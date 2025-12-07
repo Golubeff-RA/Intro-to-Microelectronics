@@ -1,20 +1,21 @@
 ﻿using lab1;
-using System.Text;
 using MathNet.Numerics.LinearAlgebra;
+using System;
+using System.Text;
 
 
 class Program
 {
-    static void Main(string[] args)
+    static void Lab1Pipeline(string[] args)
     {
-        if (args.Length == 0)
+        /*if (args.Length == 0)
         {
             Console.WriteLine("Использование: lab1.exe <input-file>");
             Console.ReadLine();
             return;
-        }
+        }*/
 
-        string inputFile = args[0];
+        string inputFile = "lab2_scheme.json"; //args[0];
         Console.WriteLine($"Входной файл: {inputFile}");
 
         string jsonContent = File.ReadAllText(inputFile, Encoding.UTF8);
@@ -37,10 +38,10 @@ class Program
         scheme.PrintSystemByMMatrix();
 
         foreach (var annot in scheme.GetAnnotToIndDict().OrderBy(x => x.Value))
-            Console.Write(annot.Key + " ");
+            Console.Write(annot.Key + ";");
 
         Console.WriteLine();
-        Console.WriteLine(scheme.CalcBigMatrix(new HashSet<int>()).ToMatrixString());
+        PrintMatrixFULL(scheme.CalcBigMatrix(new HashSet<int>()));
         Console.WriteLine("столбцы выходов (Y) = ");
         foreach (var y_col in scheme.GetNeededCols(scheme.outputs, 0))
             Console.Write(y_col.ToString() + " ");
@@ -56,17 +57,18 @@ class Program
         Console.WriteLine("\nстолбцы источников воздействия = ");
         foreach (var dx_col in scheme.GetSourcesCols())
             Console.Write(dx_col.ToString() + " ");
-        
+
         var matrix_for_dx = scheme.CalcBigMatrix(new HashSet<int>());
         var matrix_for_y = scheme.CalcBigMatrix(scheme.GetNeededCols(scheme.state_vars, scheme.GetAllBranches().Count * 2));
 
         var yellow_columns = scheme.GetNeededCols(scheme.state_vars, 0);
         yellow_columns.UnionWith(scheme.GetSourcesCols());
-        
+
         var processed_matrix_for_dx = V_V_Samokhin_matrix_desintegrator.ProcessMatrix(matrix_for_dx,
             scheme.GetNeededCols(scheme.state_vars, scheme.GetAllBranches().Count * 2), yellow_columns);
-        Console.WriteLine("Матрица для вычисления dX/dt\n" + processed_matrix_for_dx.ToString());
-
+        Console.WriteLine("Матрица для вычисления dX/dt\n");
+        PrintMatrixFULL(processed_matrix_for_dx);
+        
         var processed_matrix_for_y = V_V_Samokhin_matrix_desintegrator.ProcessMatrix(matrix_for_y,
             scheme.GetNeededCols(scheme.outputs, 0), yellow_columns);
         Console.WriteLine("Матрица для вычисления Y\n" + processed_matrix_for_y.ToString());
@@ -102,6 +104,23 @@ class Program
 
         PrettyPlotter.SavePlots(system, x_file, y_file, x_annotations, y_annotations);
         Console.ReadLine();
+    }
+    static void Main(string[] args)
+    {
+        Lab1Pipeline(args);
+    }
+
+    static void PrintMatrixFULL(Matrix<double> matrix)
+    {
+        string format = $"{{0,{6}:F{4}}} ";
+        for (int i = 0; i < matrix.RowCount; i++)
+        {
+            for (int j = 0; j < matrix.ColumnCount; j++)
+            {
+                Console.Write(string.Format(format, matrix[i, j]));
+            }
+            Console.WriteLine();
+        }
     }
 
     private static Vector<double> InputStartState(string[] x_annots)

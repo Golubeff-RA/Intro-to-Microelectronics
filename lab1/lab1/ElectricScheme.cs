@@ -113,6 +113,10 @@ namespace lab1
             var back_bone = GetBackBoneTree();
             var all_branches = GetAllBranches();
             var other_branches = new List<Branch>();
+            foreach (var elem in capacitors)
+                if (!back_bone.Contains(elem))
+                    other_branches.Add(elem);
+
             foreach (var elem in resistors)
                 if (!back_bone.Contains(elem))
                     other_branches.Add(elem);
@@ -243,8 +247,8 @@ namespace lab1
             var annot_to_idx = GetAnnotToIndDict();
             var idx_to_annot = annot_to_idx.ToDictionary(x => x.Value, x => x.Key);
             var m_matrix = CalcMMatrix();
-            int total_row_count = m_matrix.RowCount + m_matrix.ColumnCount + 
-                resistors.Count + capacitors.Count + inductors.Count;
+            int total_row_count = m_matrix.RowCount * 2 + m_matrix.ColumnCount + 
+                resistors.Count + capacitors.Count + inductors.Count + 1;
 
             Matrix<double> answer = Matrix<double>.Build.Dense(total_row_count, annot_to_idx.Count);
             int current_row = 0;
@@ -263,6 +267,17 @@ namespace lab1
                 current_row++;
             }
 
+            for (int i = 0; i < other_branches.Count; i++)
+            {
+                answer[current_row, annot_to_idx[$"dU_{other_branches[i].unique_id}/dt"]] = -1;
+                for (int j = 0; j < back_bone.Count; j++)
+                {
+                    if (m_matrix.At(i, j) != 0)
+                        answer[current_row, annot_to_idx[$"dU_{back_bone[j].unique_id}/dt"]] = -m_matrix.At(i, j);
+                }
+                current_row++;
+            }
+
             for (int i = 0; i < back_bone.Count; i++)
             {
                 answer[current_row, annot_to_idx[$"I_{back_bone[i].unique_id}"]] = -1;
@@ -273,6 +288,17 @@ namespace lab1
                 }
                 current_row++;
             }
+            /*
+            for (int i = 0; i < back_bone.Count; i++)
+            {
+                answer[current_row, annot_to_idx[$"dI_{back_bone[i].unique_id}/dt"]] = -1;
+                for (int j = 0; j < other_branches.Count; j++)
+                {
+                    if (m_matrix.At(j, i) != 0)
+                        answer[current_row, annot_to_idx[$"dI_{other_branches[j].unique_id}/dt"]] = m_matrix.At(j, i);
+                }
+                current_row++;
+            }*/
 
             foreach (var resistor in resistors)
             {
@@ -294,6 +320,21 @@ namespace lab1
                 answer[current_row, annot_to_idx[$"dI_{inductor.unique_id}/dt"]] = inductor.inductivity;
                 current_row++;
             }
+
+            foreach (var volt in voltage_sources)
+            {
+                if (volt.unique_id == 6)
+                {
+                    answer[current_row, annot_to_idx[$"dU_{volt.unique_id}/dt"]] = 1;
+                    current_row++;
+                }
+            }
+            /*
+            foreach (var cur in current_sources)
+            {
+                answer[current_row, annot_to_idx[$"dI_{cur.unique_id}/dt"]] = 1;
+                current_row++;
+            }*/
 
             foreach (int ign_col in ignore_columns)
                 for (int j = 0; j < answer.RowCount; j++)
