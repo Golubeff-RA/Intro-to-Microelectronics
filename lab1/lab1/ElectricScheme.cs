@@ -248,7 +248,7 @@ namespace lab1
             var idx_to_annot = annot_to_idx.ToDictionary(x => x.Value, x => x.Key);
             var m_matrix = CalcMMatrix();
             int total_row_count = m_matrix.RowCount * 2 + m_matrix.ColumnCount + 
-                resistors.Count + capacitors.Count + inductors.Count + 1;
+                resistors.Count + capacitors.Count + inductors.Count + voltage_sources.Count;
 
             Matrix<double> answer = Matrix<double>.Build.Dense(total_row_count, annot_to_idx.Count);
             int current_row = 0;
@@ -323,11 +323,10 @@ namespace lab1
 
             foreach (var volt in voltage_sources)
             {
-                if (volt.unique_id == 6)
-                {
+                
                     answer[current_row, annot_to_idx[$"dU_{volt.unique_id}/dt"]] = 1;
                     current_row++;
-                }
+                
             }
             /*
             foreach (var cur in current_sources)

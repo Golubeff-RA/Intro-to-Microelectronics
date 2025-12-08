@@ -8,14 +8,14 @@ class Program
 {
     static void Lab1Pipeline(string[] args)
     {
-        /*if (args.Length == 0)
+        if (args.Length == 0)
         {
             Console.WriteLine("Использование: lab1.exe <input-file>");
             Console.ReadLine();
             return;
-        }*/
+        }
 
-        string inputFile = "lab2_scheme.json"; //args[0];
+        string inputFile = args[0];
         Console.WriteLine($"Входной файл: {inputFile}");
 
         string jsonContent = File.ReadAllText(inputFile, Encoding.UTF8);
