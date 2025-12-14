@@ -1,0 +1,117 @@
+{
+    "capacitors": [
+        {
+            "unique_id": 0,
+            "capacity": 0.5,
+            "input_node": "D",
+            "output_node": "F"
+        },
+        {
+            "unique_id": 1,
+            "capacity": 0.5,
+            "input_node": "B",
+            "output_node": "D"
+        },
+        {
+            "unique_id": 2,
+            "capacity": 0.5,
+            "input_node": "A",
+            "output_node": "B"
+        },
+        {
+            "unique_id": 3,
+            "capacity": 0.1,
+            "input_node": "E",
+            "output_node": "F"
+        },
+        {
+            "unique_id": 4,
+            "capacity": 0.1,
+            "input_node": "C",
+            "output_node": "D"
+        },
+        {
+            "unique_id": 5,
+            "capacity": 0.1,
+            "input_node": "A",
+            "output_node": "B"
+        },
+        {
+            "unique_id": 6,
+            "capacity": 0.15,
+            "input_node": "E",
+            "output_node": "D"
+        },
+        {
+            "unique_id": 7,
+            "capacity": 0.15,
+            "input_node": "C",
+            "output_node": "B"
+        },
+        {
+            "unique_id": 8,
+            "capacity": 0.15,
+            "input_node": "B",
+            "output_node": "F"
+        }
+    ],
+    "voltage_sources": [
+        {
+            "unique_id": 9,
+            "voltage": 5,
+            "input_node": "F",
+            "output_node": "E"
+        },
+        {
+            "unique_id": 10,
+            "voltage": 5,
+            "input_node": "D",
+            "output_node": "C"
+        },
+        {
+            "unique_id": 11,
+            "voltage": 5,
+            "input_node": "F",
+            "output_node": "A"
+        }
+    ],
+    "current_sources": [
+        {
+            "unique_id": 12,
+            "current": 10,
+            "input_node": "D",
+            "output_node": "F"
+        },
+        {
+            "unique_id": 13,
+            "current": 10,
+            "input_node": "B",
+            "output_node": "D"
+        },
+        {
+            "unique_id": 14,
+            "current": 30,
+            "input_node": "A",
+            "output_node": "B"
+        }
+    ],
+    "state_valiables": [
+        {
+            "annotation": "U_Csi2",
+            "unique_id": 1,
+            "state_type": "voltage"
+        },
+        {
+            "annotation": "U_Csi1",
+            "unique_id": 0,
+            "state_type": "voltage"
+        }
+    ],
+    "outputs": [
+        {
+            "annotation": "U_kekes",
+            "unique_id": 8,
+            "state_type": "voltage"
+        }
+    ]
+}

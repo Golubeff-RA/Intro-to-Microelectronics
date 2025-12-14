@@ -1,7 +1,4 @@
 ﻿using MathNet.Numerics.LinearAlgebra;
-using ScottPlot.TickGenerators.TimeUnits;
-using System.Linq.Expressions;
-using System.Reflection.Metadata.Ecma335;
 using System.Text.Json.Serialization;
 
 namespace lab1
@@ -152,7 +149,7 @@ namespace lab1
             var res = GetRowColIdxs();
             var rows_idxs = res.Item1;
             var cols_idxs = res.Item2;
-           
+
             foreach (var elem in other_branches)
             {
                 // найдём контур, содержащий элемент
@@ -170,7 +167,7 @@ namespace lab1
                                 (double)Circut.CheckBranchesConsistency(circut_with_elem.node_order, elem, branch);
                 }
             }
-            
+
             return matrix;
         }
         public void PrintScheme()
@@ -186,7 +183,7 @@ namespace lab1
             Console.WriteLine("\n===Выходные параметры===");
             foreach (var variable in outputs) Console.WriteLine(variable.ToString());
         }
-        public void PrintSystemByMMatrix()
+        public void PrintSystemByMMatrix(string[] annotations_of_basalin = null)
         {
             var other_branches = GetOtherBranches();
             var back_bone = GetBackBoneTree();
@@ -194,36 +191,41 @@ namespace lab1
             var res = GetRowColIdxs();
             var rows_idxs = res.Item1;
             var cols_idxs = res.Item2;
-
+            string GetAnnotation(int id, string[] annot)
+            {
+                if (annot == null)
+                    return id.ToString();
+                return annot[id];
+            }
             Console.WriteLine("___");
             foreach (var elem in other_branches)
-            { 
-                Console.Write($"| U_{elem.unique_id} = ");
+            {
+                Console.Write($"| U_{GetAnnotation(elem.unique_id, annotations_of_basalin)} = ");
                 foreach (var bone in back_bone)
                 {
                     var coef = m_matrix[rows_idxs[elem.unique_id], cols_idxs[bone.unique_id]];
                     if (coef == 1)
-                        Console.Write($"- U_{bone.unique_id} ");
+                        Console.Write($"- U_{GetAnnotation(bone.unique_id, annotations_of_basalin)} ");
                     else if (coef == -1)
-                        Console.Write($"+ U_{bone.unique_id} ");
+                        Console.Write($"+ U_{GetAnnotation(bone.unique_id, annotations_of_basalin)} ");
                     else
-                        Console.Write(new string(' ', ($"+ U_{bone.unique_id} ").Length));
+                        Console.Write(new string(' ', ($"+ U_{GetAnnotation(bone.unique_id, annotations_of_basalin)} ").Length));
                 }
                 Console.WriteLine();
             }
             Console.WriteLine("|");
             foreach (var bone in back_bone)
             {
-                Console.Write($"| I_{bone.unique_id} = ");
+                Console.Write($"| I_{GetAnnotation(bone.unique_id, annotations_of_basalin)} = ");
                 foreach (var elem in other_branches)
                 {
                     var coef = m_matrix[rows_idxs[elem.unique_id], cols_idxs[bone.unique_id]];
                     if (coef == 1)
-                        Console.Write($"+ I_{elem.unique_id} ");
+                        Console.Write($"+ I_{GetAnnotation(elem.unique_id, annotations_of_basalin)} ");
                     else if (coef == -1)
-                        Console.Write($"- I_{elem.unique_id} ");
+                        Console.Write($"- I_{GetAnnotation(elem.unique_id, annotations_of_basalin)} ");
                     else
-                        Console.Write(new string(' ', ($"+ I_{elem.unique_id} ").Length));
+                        Console.Write(new string(' ', ($"+ I_{GetAnnotation(elem.unique_id, annotations_of_basalin)} ").Length));
                 }
                 Console.WriteLine();
             }
@@ -234,7 +236,8 @@ namespace lab1
         {
             var answer = new Dictionary<string, int>();
             var all_components = GetAllBranches();
-            foreach (var component in all_components) {
+            foreach (var component in all_components)
+            {
                 answer.Add($"U_{component.unique_id}", component.unique_id);
                 answer.Add($"I_{component.unique_id}", component.unique_id + all_components.Count());
                 answer.Add($"dU_{component.unique_id}/dt", component.unique_id + all_components.Count() * 2);
@@ -245,9 +248,8 @@ namespace lab1
         public Matrix<double> CalcBigMatrix(HashSet<int> ignore_columns)
         {
             var annot_to_idx = GetAnnotToIndDict();
-            var idx_to_annot = annot_to_idx.ToDictionary(x => x.Value, x => x.Key);
             var m_matrix = CalcMMatrix();
-            int total_row_count = m_matrix.RowCount * 2 + m_matrix.ColumnCount + 
+            int total_row_count = m_matrix.RowCount * 2 + m_matrix.ColumnCount * 2 +
                 resistors.Count + capacitors.Count + inductors.Count + voltage_sources.Count;
 
             Matrix<double> answer = Matrix<double>.Build.Dense(total_row_count, annot_to_idx.Count);
@@ -266,6 +268,18 @@ namespace lab1
                 }
                 current_row++;
             }
+            
+
+            for (int i = 0; i < back_bone.Count; i++)
+            {
+                answer[current_row, annot_to_idx[$"I_{back_bone[i].unique_id}"]] = -1;
+                for (int j = 0; j < other_branches.Count; j++)
+                {
+                    if (m_matrix.At(j, i) != 0)
+                        answer[current_row, annot_to_idx[$"I_{other_branches[j].unique_id}"]] = m_matrix.At(j, i);
+                }
+                current_row++;
+            }
 
             for (int i = 0; i < other_branches.Count; i++)
             {
@@ -280,17 +294,6 @@ namespace lab1
 
             for (int i = 0; i < back_bone.Count; i++)
             {
-                answer[current_row, annot_to_idx[$"I_{back_bone[i].unique_id}"]] = -1;
-                for (int j = 0; j < other_branches.Count; j++)
-                {
-                    if (m_matrix.At(j, i) != 0)
-                        answer[current_row, annot_to_idx[$"I_{other_branches[j].unique_id}"]] = m_matrix.At(j, i);
-                }
-                current_row++;
-            }
-            /*
-            for (int i = 0; i < back_bone.Count; i++)
-            {
                 answer[current_row, annot_to_idx[$"dI_{back_bone[i].unique_id}/dt"]] = -1;
                 for (int j = 0; j < other_branches.Count; j++)
                 {
@@ -298,7 +301,7 @@ namespace lab1
                         answer[current_row, annot_to_idx[$"dI_{other_branches[j].unique_id}/dt"]] = m_matrix.At(j, i);
                 }
                 current_row++;
-            }*/
+            }
 
             foreach (var resistor in resistors)
             {
@@ -321,24 +324,68 @@ namespace lab1
                 current_row++;
             }
 
-            foreach (var volt in voltage_sources)
-            {
-                
-                    answer[current_row, annot_to_idx[$"dU_{volt.unique_id}/dt"]] = 1;
-                    current_row++;
-                
-            }
-            /*
-            foreach (var cur in current_sources)
-            {
-                answer[current_row, annot_to_idx[$"dI_{cur.unique_id}/dt"]] = 1;
-                current_row++;
-            }*/
-
             foreach (int ign_col in ignore_columns)
                 for (int j = 0; j < answer.RowCount; j++)
                     answer[j, ign_col] = 0;
 
+            return answer;
+        }
+
+        public Matrix<double> AppendForLab2(Matrix<double> base_matrix)
+        {
+            var other_branches = GetOtherBranches();
+            var back_bone = GetBackBoneTree();
+            var m_matrix = CalcMMatrix();
+            var annot_to_idx = GetAnnotToIndDict();
+            Matrix<double> answer = Matrix<double>.Build.Dense(base_matrix.RowCount + 1, base_matrix.ColumnCount);
+            for (int i = 0; i < base_matrix.RowCount; ++i)
+                for (int j = 0; j < base_matrix.ColumnCount; ++j)
+                    answer[i, j] = base_matrix[i, j];
+            int current_row = base_matrix.RowCount;
+
+            foreach (var volt in voltage_sources)
+            {
+                if (volt.unique_id == 6)
+                {
+                    answer[current_row, annot_to_idx[$"dU_{volt.unique_id}/dt"]] = 1;
+                    current_row++;
+                }
+            }
+            return answer;
+        }
+
+        public Matrix<double> AppendForLab3(Matrix<double> base_matrix)
+        {
+            var annot_to_idx = GetAnnotToIndDict();
+            Matrix<double> answer = Matrix<double>.Build.Dense(base_matrix.RowCount +
+                current_sources.Count + 2 + 2 + 2, base_matrix.ColumnCount);
+            for (int i = 0; i < base_matrix.RowCount; ++i)
+                for (int j = 0; j < base_matrix.ColumnCount; ++j)
+                    answer[i, j] = base_matrix[i, j];
+            int current_row = base_matrix.RowCount;
+            foreach (var volt in voltage_sources)
+            {
+                if (volt.unique_id == 9 || volt.unique_id == 10)
+                {
+                    answer[current_row, annot_to_idx[$"dU_{volt.unique_id}/dt"]] = 1;
+                    current_row++;
+                }
+            }
+            // вычислим S как константу, как в решении лабы
+            double S = current_sources[0].current / voltage_sources[0].voltage;
+            
+            answer[current_row, annot_to_idx["I_12"]] = -1;
+            answer[current_row, annot_to_idx["U_9"]] = S;
+            current_row++;
+            answer[current_row, annot_to_idx["I_13"]] = -1;
+            answer[current_row, annot_to_idx["U_10"]] = S;
+            current_row++;
+            answer[current_row, annot_to_idx["I_14"]] = -1;
+            answer[current_row, annot_to_idx["U_5"]] = S;
+            current_row++;
+            answer[current_row, annot_to_idx["I_9"]] = 1;
+            current_row++;
+            answer[current_row, annot_to_idx["I_10"]] = 1;
             return answer;
         }
         public HashSet<int> GetNeededCols(List<StateVariable> vars, int padding)
@@ -363,24 +410,25 @@ namespace lab1
                 cols.Add(volt.unique_id);
             return cols;
         }
-        public Tuple<Matrix<double>, Matrix<double>> CalcTwoMatrices(Matrix<double> processed, 
-            HashSet<int> blue_cols, HashSet<int>yellow_cols, HashSet<int> green_cols)
+        public Tuple<Matrix<double>, Matrix<double>> CalcTwoMatrices(Matrix<double> processed,
+            HashSet<int> blue_cols, HashSet<int> yellow_cols, HashSet<int> green_cols)
         {
-            var A = Matrix<double>.Build.Dense(state_vars.Count, state_vars.Count);
-            var B = Matrix<double>.Build.Dense(state_vars.Count, current_sources.Count + voltage_sources.Count);
+            var A = Matrix<double>.Build.Dense(blue_cols.Count, state_vars.Count);
+            var B = Matrix<double>.Build.Dense(blue_cols.Count, current_sources.Count + voltage_sources.Count);
             int current_row = 0;
             foreach (int blue_col in blue_cols.OrderBy(c => c))
             {
+                double normalizer = processed[current_row, blue_col];
                 int current_col = 0;
                 foreach (int yellow_col in yellow_cols.OrderBy(c => c))
                 {
-                    A[current_row, current_col] = -processed[current_row, yellow_col];
+                    A[current_row, current_col] = -processed[current_row, yellow_col] / normalizer;
                     current_col++;
                 }
                 current_col = 0;
                 foreach (int green_col in green_cols.OrderBy(c => c))
                 {
-                    B[current_row, current_col] = -processed[current_row, green_col];
+                    B[current_row, current_col] = -processed[current_row, green_col] / normalizer;
                     current_col++;
                 }
                 current_row++;
@@ -396,7 +444,6 @@ namespace lab1
                 v[i] = current_sources[i - voltage_sources.Count].current;
             return v;
         }
-
         public static string[] GetAnnotationsOf(List<StateVariable> vars)
         {
             string[] answer = new string[vars.Count];

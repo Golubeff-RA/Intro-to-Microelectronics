@@ -31,7 +31,7 @@
                     return -1;
                 else
                     return 1;
-                    var nodes = nodeOrder.Select(c => c.ToString()).ToList();
+            var nodes = nodeOrder.Select(c => c.ToString()).ToList();
             int n = nodes.Count;
             int dir1 = GetBranchDirection(branch1, nodes);
             int dir2 = GetBranchDirection(branch2, nodes);

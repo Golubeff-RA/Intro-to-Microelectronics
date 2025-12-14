@@ -2,7 +2,7 @@
     "resistors": [
         {
             "unique_id": 0,
-            "resistance": -0.2,
+            "resistance": 0.2,
             "input_node": "B",
             "output_node": "C"
         }
