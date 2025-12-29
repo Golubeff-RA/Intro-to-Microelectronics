@@ -131,10 +131,10 @@ class Program
         string[] annotations_basalin_lab3 = {"C_si1", "C_si2", "C_si3", "C_zi1", "C_zi2",
             "C_zi3", "C_zs1", "C_zs2", "C_n", "u_zi1", "u_zi2", "U_p", "S*u_zi1",
             "S*u_zi2", "S*u_Czi3"};
-        ElectricScheme scheme = ParseScheme(args);
-        //Lab1Pipeline(scheme, annotations_basalin_lab1);
-        //Lab2Pipeline(scheme, annotations_basalin_lab2);
-        Lab3Pipeline(scheme, annotations_basalin_lab3);
+        ElectricScheme scheme = ParseScheme(["test.json"]);
+        //Lab1Pipeline(scheme, null);
+        Lab2Pipeline(scheme, annotations_basalin_lab2);
+        //Lab3Pipeline(scheme, annotations_basalin_lab3);
     }
     static void PrintMatrixFULL(Matrix<double> matrix)
     {

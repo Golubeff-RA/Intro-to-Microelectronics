@@ -1,0 +1,38 @@
+{
+    "capacitors": [
+        {
+            "unique_id": 0,
+            "capacity": 0.15,
+            "input_node": "A",
+            "output_node": "B"
+        }
+    ],
+    "inductors": [
+        {
+            "unique_id": 1,
+            "inductivity": 1,
+            "input_node": "A",
+            "output_node": "B"
+        }
+    ],
+    "state_valiables": [
+        {
+            "annotation" : "U_C",
+            "unique_id": 0,
+            "state_type": "voltage"
+        },
+        {
+            "annotation" : "I_L",
+            "unique_id": 1,
+            "state_type": "current"
+        }
+    ],
+
+    "outputs": [ 
+        {
+            "annotation" : "I_C",
+            "unique_id": 0,
+            "state_type": "current"
+        }
+    ]
+}
